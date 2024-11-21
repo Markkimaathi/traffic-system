@@ -1,9 +1,5 @@
-import sys
-sys.path.append(sys.path[0]+"/classes")
-sys.path.append(sys.path[0]+"/manager")
-sys.path.append(sys.path[0]+"/simulator")
-from vehicle import Vehicle
-from route import Node, Edge, Route
+from classes import Vehicle
+from manager import Node, Edge, Route
 from simulator import run_simulation
 
 def main():
@@ -81,9 +77,9 @@ def main():
     routes.append(Route([edges[ 7], edges[18], edges[ 8]])) # right from west
     routes.append(Route([edges[ 7], edges[19], edges[12]])) # left from west
 
-    vehicles.append(Vehicle([-50,1.5],[8,0],[0,0],[1,0],1.95,4.90, 'sedan.png'))  # west to east
-    vehicles.append(Vehicle([-1.5,-50],[0,8],[0,0],[0,1],1.95,4.90, 'sedan.png')) # north to south
-    vehicles.append(Vehicle([1.5,50],[0,-8],[0,0],[0,-1],1.95,4.90, 'sedan.png')) # south to north
+    vehicles.append(Vehicle([-50,1.5],[8,0],[0,0],[1,0],2.23,4.90,1.25,'straight','sedan.png'))  # west to east
+    vehicles.append(Vehicle([-1.5,-50],[0,8],[0,0],[0,1],2.23,4.90,1.25,'straight','sedan.png')) # north to south
+    vehicles.append(Vehicle([1.5,50],[0,-8],[0,0],[0,-1],2.23,4.90,1.25,'straight','sedan.png')) # south to north
 
     # scenery
     # 2 rects for road, 
