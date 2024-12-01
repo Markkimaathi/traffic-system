@@ -27,27 +27,25 @@ class Manager:
     #     else:
     #         raise ValueError("car has no direction")
 
-    def get_collisions():
-        # list of collisions
-        # maybe have car with priority first and other car second
-        return
+# helpers
+def get_collisions():
+    # list of collisions
+    # maybe have car with priority first and other car second
+    return
 
-    def collision_preventing_adjustment():
-        # adjustment must be a timed acceleration/deceleration
-        return
-
-    def update(self, vehicles: list[Vehicle]):
-        for vehicle in vehicles:
-            # vehicle already in list?
-            vehicle_in_list = any(manager_vehicle.id == vehicle.id for manager_vehicle in self.vehicles)
-            if vehicle_in_list: continue
-
-            # vehicle within manager radius?
-            distance_to_vehicle = np.linalg.norm(vehicle.position-self.position)
-            if distance_to_vehicle > self.radius: continue
-
-            # vehicle is not in list and within radius, add to list
-            self.vehicles.append(vehicle)
+def collision_preventing_adjustment():
+    # adjustment must be a timed acceleration/deceleration
+    return
     
-    def reset(self):
-        self.vehicles.clear()
+def update_manager_vehicle_list(self, manager: Manager, vehicles: list[Vehicle]):
+    for vehicle in vehicles:
+        # vehicle already in list?
+        vehicle_in_list = any(manager_vehicle.id == vehicle.id for manager_vehicle in manager.vehicles)
+        if vehicle_in_list: continue
+
+        # vehicle within manager radius?
+        distance_to_vehicle = np.linalg.norm(vehicle.position-manager.position)
+        if distance_to_vehicle > manager.radius: continue
+
+        # vehicle is not in list and within radius, add to list
+        manager.vehicles.append(vehicle)
