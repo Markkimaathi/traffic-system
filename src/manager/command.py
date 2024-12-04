@@ -1,3 +1,4 @@
+
 class Command:
     acceleration_sets: list[float, float] = [] # symoblizes a piecewise function
                                                # 0: acceleration to set to
