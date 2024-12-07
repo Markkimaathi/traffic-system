@@ -1,37 +1,30 @@
 import numpy as np
 from .node import Node
-from sympy import Segment, Circle, Point
 
 class Edge():
     start: Node = None
     end: Node = None
-    sympy_obj: Segment | Circle = None
+    curved: bool = True
+    center: np.ndarray = None # center is only required for curved edges
+    radius: float = None
+    clockwise: bool = None
 
-    def __init__(self, start: Node, end: Node):
+    def __init__(self, start: Node, end: Node, curved:bool=False, center=None, clockwise: bool=False):
         self.start = start
         self.end = end
-
-class StraightEdge(Edge):
-    def __init__(self, start: Node, end: Node):
-        Edge.__init__(self, start, end)
-        self.sympy_obj = Segment(Point(start.position[0], start.position[1]), Point(end.position[0], end.position[1]))
-        
-class CircularEdge(Edge):
-    center: Node
-    radius: float
-    clockwise: bool
-
-    def __init__(self, start: Node, end: Node, center: np.ndarray, clockwise: bool=False):
-        Edge.__init__(self, start, end)
-        self.radius = np.linalg.norm(start.position - center)
-        self.center = center
+        self.curved = curved
+        if self.curved == True and center.shape == None: # if shape is None, this means center has not been initialized
+            raise ValueError("center point must be provided if edge is not straight")
+        if center is not None:
+            self.radius = np.linalg.norm(start.position - center)
+            self.center = center
         self.clockwise = clockwise
-        self.sympy_obj = Circle(Point(center[0], center[1]), self.radius)
+
 
 def get_length(edge: Edge) -> float:
-    if isinstance(edge, StraightEdge):
+    if not edge.curved:
         return np.linalg.norm(edge.start.position - edge.end.position)
-    elif isinstance(edge, CircularEdge):
+    elif edge.curved:
         radius = np.linalg.norm(edge.start.position-edge.center)
         vector_start = edge.start.position - edge.center
         vector_end = edge.end.position - edge.center
