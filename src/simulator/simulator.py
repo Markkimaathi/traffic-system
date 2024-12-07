@@ -11,20 +11,19 @@ import numpy as np
 
 from classes.vehicle import Vehicle, vehicle_event_loop, vehicle_copy
 from classes.button import Button
-from manager.manager import Manager, manager_event_loop
+from manager.manager import Manager, manager_event_loop 
 from classes.node import Node
 from classes.edge import Edge
 from classes.route import Route
-from .render import render_world, render_manager, render_vehicles, render_buttons, render_time
+from .render import render_world, render_manager, render_vehicles, render_buttons
 from .update import update_world
 
-def run_simulation(initial_vehicles: list[Vehicle], nodes: list[Node], edges: list[Edge], routes: list[Route], manager: Manager): # requires initialization of lanes, manager, vehicles
+def run_simulation(initial_vehicles: list[Vehicle], nodes: list[Node], edges: list[Edge], routes: list[Route], intersection_points, manager: Manager): # requires initialization of lanes, manager, vehicles
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     running = True
     delta_time = 0
-    time_elapsed = 0
 
     vehicles = vehicle_copy(initial_vehicles)
     is_run = True
@@ -66,10 +65,9 @@ def run_simulation(initial_vehicles: list[Vehicle], nodes: list[Node], edges: li
         render_buttons(screen, buttons)
 
         # optionally render nodes and edges. for now always on
-        render_world(screen, nodes, edges)
+        render_world(screen, nodes, edges, intersection_points)
         render_manager(screen, manager)
         render_vehicles(screen, vehicles)
-        render_time(screen, time_elapsed, SCREEN_WIDTH)
 
         # manager 'cpu'
         manager_event_loop(manager, vehicles, delta_time)
@@ -78,6 +76,11 @@ def run_simulation(initial_vehicles: list[Vehicle], nodes: list[Node], edges: li
         for vehicle in vehicles:
             vehicle_event_loop(vehicle, delta_time)
 
+        # vehicle removal 
+        for vehicle in vehicles:
+            if vehicle.route_position > vehicle.route.total_length:
+                vehicles.remove(vehicle)
+
         if is_run:
             # physical changes to world (updating positions, velocity, etc.)
             update_world(delta_time, vehicles)
@@ -85,6 +88,4 @@ def run_simulation(initial_vehicles: list[Vehicle], nodes: list[Node], edges: li
         # updates the screen
         pygame.display.update()
         delta_time = clock.tick(60) / 1000
-        time_elapsed += delta_time
-        
     pygame.quit()
