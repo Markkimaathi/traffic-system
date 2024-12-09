@@ -17,7 +17,7 @@ import pygame
 
 from classes.vehicle import Vehicle, vehicle_event_loop, vehicle_copy, driver_traffic_update_command
 from classes.button import Button
-from manager.manager import Manager, manager_event_loop, reset, detect_collisions
+from manager.manager import Manager, manager_event_loop, reset
 from classes.node import Node
 from classes.edge import Edge
 from classes.route import Route
@@ -116,17 +116,16 @@ def run_simulation(initial_vehicles: list[Vehicle], nodes: list[Node], edges: li
         render_toolbar(screen, time_elapsed, buttons)
         render_title(screen)
 
-        # manager 'cpu'
-        manager_event_loop(manager, vehicles, time_elapsed)
+        # # manager 'cpu'
+        # manager_event_loop(manager, vehicles, time_elapsed)
 
         # vehicles 'cpu'
         for vehicle in vehicles:
             vehicle_event_loop(vehicle, time_elapsed)
 
-        # standard_traffic = True
-        # if standard_traffic:
-        #     for vehicle in vehicles:
-        #         driver_traffic_update_command(vehicle)
+        standard_traffic = True
+        if standard_traffic:
+            driver_traffic_update_command(vehicles, time_elapsed)
 
         # vehicle removal 
         for vehicle in vehicles:
@@ -137,9 +136,6 @@ def run_simulation(initial_vehicles: list[Vehicle], nodes: list[Node], edges: li
             # physical changes to world (updating positions, velocity, etc.)
             update_world(delta_time * playback_speed_factor, vehicles)
             time_elapsed += delta_time * playback_speed_factor
-
-        if detect_collisions == True:
-            print(f"Collision detected")
             
         # updates the screen
         pygame.display.update()

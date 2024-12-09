@@ -5,8 +5,6 @@ from classes.vehicle import Vehicle
 from classes.node import Node
 from classes.edge import Edge, StraightEdge, CircularEdge
 from classes.route import route_position_to_world_position, direction_at_route_position
-from standard_traffic.traffic_master import TrafficMaster
-from standard_traffic.traffic_light import TrafficLight, TrafficState, get_state
 from manager.manager import Manager, CAR_COLLISION_DISTANCE
 from classes.button import Button
 from .helper import world_to_screen_vector, world_to_screen_scalar
@@ -71,6 +69,7 @@ def render_vehicles(screen: Surface, vehicles: list[Vehicle]) -> None:
         vehicle_center_screen_pos = world_to_screen_vector(screen, vehicle_center_point, zoom_factor)
         img = pygame.transform.smoothscale(vehicle.image, (vehicle_screen_length, vehicle_screen_width))
         vehicle_angle = direction_at_route_position(vehicle.route, vehicle.route_position)
+        vehicle.direction_angle = vehicle_angle
         img = pygame.transform.rotate(img, vehicle_angle)
         car_rect = img.get_rect()
         car_rect.center = vehicle_center_screen_pos
@@ -104,23 +103,6 @@ def render_world(screen: Surface, nodes: list[Node], edges: list[Edge], route_vi
     render_intersections(screen, intersection_points)
     render_border(screen)
     # render_scenery()
-
-# def render_traffic_master(screen: Surface, traffic_master: TrafficMaster, dt: int) -> None:
-#     """Render function for TrafficMaster that controls all the TrafficLights."""
-
-#     for type_list in traffic_master.traffic_lights:
-#         for light in type_list:
-#             light_position = world_to_screen_vector(screen, light.node.position, zoom_factor)
-#             color = light.get_state().get_color()
-#             pygame.draw.circle(screen, color, light_position, 1)
-
-def render_traffic_lights(screen: Surface, traffic_master: TrafficMaster, dt: int) -> None:
-    """Render function for TrafficMaster that controls all the TrafficLights."""
-    for type_list, lights in traffic_master.traffic_lights.items():
-        for light in lights:
-            light_position = world_to_screen_vector(screen, light.node.position, zoom_factor)
-            color = get_state(light).get_color()
-            pygame.draw.circle(screen, color, light_position, 1)
 
 def render_manager(screen: Surface, manager: Manager) -> None:
     """Render function for Manager."""
