@@ -1,7 +1,7 @@
 {
   "stored_vehicles": [
-    {"id": "vehicle_0", "route": "route_0", "route_position": 0},
-    {"id": "vehicle_1", "route": "route_1", "route_position": 0} 
+    {"id": "vehicle_0", "route": "route_0", "route_position": 0, "velocity": 8},
+    {"id": "vehicle_1", "route": "route_1", "route_position": 0, "velocity": 8} 
   ],
 
   "nodes": [
@@ -25,7 +25,12 @@
   ],
 
   "routes": [
-    {"id": "route_0", "source": "edge_0", "intermediate": "edge_1", "target": "edge_2"},
-    {"id": "route_1", "source": "edge_3", "intermediate": "edge_4", "target": "edge_5"}
-  ]
+    {"id": "route_0", "source": "edge_0", "intermediate": ["edge_1"], "target": "edge_2"},
+    {"id": "route_1", "source": "edge_3", "intermediate": ["edge_4"], "target": "edge_5"}
+  ],
+
+  "manager": {
+    "position": [0, 0],
+    "radius": 50
+  }
 }
