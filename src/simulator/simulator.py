@@ -17,7 +17,7 @@ import pygame
 
 from classes.vehicle import Vehicle, vehicle_event_loop, vehicle_copy, driver_traffic_update_command
 from classes.button import Button
-from manager.manager import Manager, manager_event_loop, reset
+from manager.manager import Manager, manager_event_loop, reset, detect_collisions
 from classes.node import Node
 from classes.edge import Edge
 from classes.route import Route
@@ -92,13 +92,14 @@ def run_simulation(initial_vehicles: list[Vehicle], nodes: list[Node], edges: li
     add_playback_speed = Button((40, 40, 40), (255, 50, 50), (525, screen.get_height()-TOOLBAR_HEIGHT+50), (35, 30), '+', lambda: toggle_playback_speed("+"), ())
 
     buttons = [toggle_button, restart_button, routes_visibility_button, zoom_button, subtract_playback_speed, add_playback_speed, display_playback_speed]
+
     while running:
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            
+        
             if event.type == pygame.MOUSEBUTTONDOWN:
                 [b.click() for b in buttons]
 
@@ -123,9 +124,10 @@ def run_simulation(initial_vehicles: list[Vehicle], nodes: list[Node], edges: li
         for vehicle in vehicles:
             vehicle_event_loop(vehicle, time_elapsed)
 
-        standard_traffic = False
-        if standard_traffic:
-            driver_traffic_update_command(vehicles, time_elapsed)
+        # standard_traffic = True
+        # if standard_traffic:
+        #     for vehicle in vehicles:
+        #         driver_traffic_update_command(vehicle)
 
         # vehicle removal 
         for vehicle in vehicles:
@@ -136,7 +138,23 @@ def run_simulation(initial_vehicles: list[Vehicle], nodes: list[Node], edges: li
             # physical changes to world (updating positions, velocity, etc.)
             update_world(delta_time * playback_speed_factor, vehicles)
             time_elapsed += delta_time * playback_speed_factor
+
+        collision_check, car_info = detect_collisions(manager, vehicles, delta_time, time_elapsed)
+
+        if collision_check == True:
+            is_run = False
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
             
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    [b.click() for b in buttons]
+
+                elif event.type == pygame.MOUSEWHEEL:
+                    zoom_factor = scroll_handler(event, zoom_factor)
+                    set_zoomed_render(zoom_factor)
+
         # updates the screen
         pygame.display.update()
         delta_time = clock.tick(60) / 1000
