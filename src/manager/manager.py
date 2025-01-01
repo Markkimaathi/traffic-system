@@ -26,7 +26,6 @@ class Manager:
     vehicles: list[Vehicle] = []
     intersecting_points = None
     collisions: list[Collision] = []
-    events: str = ""
 
     def __init__(self, position: np.ndarray, radius: float, routes: list[Route]) -> None:
         # initialize
@@ -40,7 +39,7 @@ def reset(manager: Manager) -> None:
 def manager_event_loop(manager: Manager, vehicles: list[Vehicle], cur_time: float) -> None:
     """Event loop for Manager. Updates manager.vehicles if a Vehicle enters its radius. Also recalculates and sends Commands on update of manager.vehicles."""
     if _update_manager_vehicle_list(manager, vehicles):
-        _compute_and_send_acceleration_commands(manager, cur_time)
+        # _compute_and_send_acceleration_commands(manager, cur_time)
         manager.collisions = get_collisions(manager, cur_time)
 
 def _update_manager_vehicle_list(manager: Manager, vehicles: list[Vehicle]) -> bool:
@@ -79,11 +78,10 @@ def get_collisions(manager: Manager, cur_time: float) -> list[Collision]:
         result = minimize_scalar(distance_objective, bounds=(0, vehicle_out_of_bounds_time), method='bounded')
         if result.success:
             time_of_collision = result.x + cur_time
-            # print(f"The objects come within 2.5 meters of each other at t = {time_of_collision}")
-            # print(f"{vehicle_pair[0].name}: {route_position_to_world_position(vehicle_pair[0].route, route_position_at_time(vehicle_pair[0], result.x, cur_time))}")
-            # print(f"{vehicle_pair[1].name}: {route_position_to_world_position(vehicle_pair[1].route, route_position_at_time(vehicle_pair[1], result.x, cur_time))}")
+            print(f"The objects come within 2.5 meters of each other at t = {time_of_collision}")
+            print(f"{vehicle_pair[0].name}: {route_position_to_world_position(vehicle_pair[0].route, route_position_at_time(vehicle_pair[0], result.x, cur_time))}")
+            print(f"{vehicle_pair[1].name}: {route_position_to_world_position(vehicle_pair[1].route, route_position_at_time(vehicle_pair[1], result.x, cur_time))}")
             collisions.append(Collision(vehicle_pair[0], vehicle_pair[1], time_of_collision))
-            manager.events += f"Collision between {vehicle_pair[0].name}({vehicle_pair[0].id}) and {vehicle_pair[1].name} ({vehicle_pair[1].id}) at time {time_of_collision}\n"
     return collisions
 
 def route_position_at_time(vehicle: Vehicle, delta_time: float, cur_time: float) -> float:
@@ -126,7 +124,6 @@ def _compute_and_send_acceleration_commands(manager: Manager, elapsed_time: floa
         # if v.name == "acc":
         #     v.command = update_cmd(v.command, t, a, elapsed_time) # this will make cars crash for presets/collision_by_command.json
         v.command = update_cmd(v.command, t, a, elapsed_time)
-        manager.events += f"Command sent to {v.name}({v.id}) | T: {t}, A: {a}\n"
 
 def _compute_command(elapsed_time: float) -> tuple[np.array, np.array]:
     """Return np.array of acceleration and time values."""
@@ -135,3 +132,25 @@ def _compute_command(elapsed_time: float) -> tuple[np.array, np.array]:
     t = [elapsed_time, elapsed_time + randint(1, 3), elapsed_time + randint(3, 5)]
     a = [randint(1, 3), randint(-3, 3), 3]
     return np.array(t), np.array(a)
+
+def detect_collisions(manager: Manager, vehicles: list[Vehicle], delta_time: float, cur_time: float) -> list[Collision]:
+    collision = False
+    vehicle_pairs = combinations(manager.vehicles, 2)
+    car_info = []
+
+    for vehicle in vehicles:
+        vehicle.route_position = route_position_at_time(vehicle, delta_time, cur_time)
+        car_position = []
+    
+        for vehicle_pair in vehicle_pairs:
+            wp0 = route_position_to_world_position(vehicle_pair[0].route, vehicle.route_position)
+            wp1 = route_position_to_world_position(vehicle_pair[1].route, vehicle.route_position)
+            distance = np.linalg.norm(wp1 - wp0)
+            
+            if distance <= CAR_COLLISION_DISTANCE:
+                collision = True
+                car_info = [vehicle_pair[0].name, vehicle_pair[1].name, cur_time]
+                car_position = np.array([wp0, wp1])
+                print(f"Collision detected between {car_info[0]} and {car_info[1]} at time: {car_info[2]}")
+
+    return collision, car_position
