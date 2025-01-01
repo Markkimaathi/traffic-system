@@ -12,15 +12,8 @@ from classes.vehicle import Vehicle
 from simulator.simulator import run_simulation
 from helper import get_intersections, load_nodes, load_edges, load_routes, load_vehicles
 import argparse
-import argparse
 
 def main() -> None:
-    verbose = False
-    # Check if -v flag is present
-    if '-v' in sys.argv:
-        verbose = True
-        sys.argv.remove('-v')
-    
     verbose = False
     # Check if -v flag is present
     if '-v' in sys.argv:
