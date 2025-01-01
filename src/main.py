@@ -1,6 +1,8 @@
 import sys
 import numpy as np
 import json
+import logging
+from datetime import datetime
 
 from manager.manager import Manager
 from classes.node import Node
@@ -10,8 +12,15 @@ from classes.vehicle import Vehicle
 from simulator.simulator import run_simulation
 from helper import get_intersections, load_nodes, load_edges, load_routes, load_vehicles
 import argparse
+import argparse
 
 def main() -> None:
+    verbose = False
+    # Check if -v flag is present
+    if '-v' in sys.argv:
+        verbose = True
+        sys.argv.remove('-v')
+    
     verbose = False
     # Check if -v flag is present
     if '-v' in sys.argv:
@@ -24,15 +33,23 @@ def main() -> None:
     
     preset_name = sys.argv[1]
     if verbose:
-        print(f"Logging is enabled for preset: {preset_name}")
-    
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        logging.basicConfig(
+            level=logging.DEBUG,
+            # More info can be provided to logger, example: format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'  
+            format='%(asctime)s - %(message)s',
+            handlers=[
+                logging.FileHandler(f"logs/events-{timestamp}.log"), # To overwrite same log file: logging.FileHandler('vehicle_manager.log', w)
+                logging.StreamHandler()
+            ]
+        )
+        logging.info(f"Logging is enabled for preset: {preset_name}")
+    else:
+        logging.basicConfig(level=logging.CRITICAL)
+
     manager, nodes, curr_edges, routes, vehicles = load_preset(preset_name)
     intersection_points = get_intersections(routes)
     run_simulation(vehicles, nodes, curr_edges, routes, intersection_points, manager)
-    
-    if(verbose):
-        print(manager.events)
-        #TODO: gotta log in a file as well
 
 def load_preset(file_path: str) -> tuple[Manager, list[Node], list[Edge], list[Route], list[Vehicle]]:
     with open(file_path, 'r') as file:
