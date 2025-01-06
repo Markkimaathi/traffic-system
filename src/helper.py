@@ -3,6 +3,7 @@ from classes.route import Route
 from classes.node import Node
 from classes.edge import Edge, StraightEdge, CircularEdge
 from classes.vehicle import Vehicle
+from standard_traffic.traffic_light import TrafficLight, TrafficState
 import sympy
 from sympy import Point2D
 from itertools import combinations
@@ -76,10 +77,13 @@ def load_edges(loaded_edges: object, edges: list[Edge], node_dict: dict[str, Nod
     for edge in loaded_edges:
         if edge["id"] in edge_dict:
             raise ValueError(f"Duplicate edge ID found: {edge['id']}")
+        t_light = None
+        if edge.get("traffic_light"):
+            t_light = edge["light"]
         if edge.get("center"):
-            new_edge = CircularEdge(edge["id"], node_dict[edge["source"]], node_dict[edge["target"]], np.array(edge["center"]), edge["clockwise"])
+            new_edge = CircularEdge(edge["id"], node_dict[edge["source"]], node_dict[edge["target"]], np.array(edge["center"]), clockwise=edge["clockwise"], traffic_light=t_light)
         else:
-            new_edge = StraightEdge(edge["id"], node_dict[edge["source"]], node_dict[edge["target"]])
+            new_edge = StraightEdge(edge["id"], node_dict[edge["source"]], node_dict[edge["target"]], t_light)
         edge_dict[edge["id"]] = new_edge
         edges.append(new_edge)
     return edge_dict
@@ -133,5 +137,38 @@ def load_vehicles(loaded_vehicles: object, vehicles: list[Vehicle], route_dict: 
         new_vehicle = Vehicle(v["id"], v["name"], route_dict[v["route"]], v["route_position"], v["velocity"], 0, 2.23, 4.90, 1.25, 'assets/sedan.png')
         vehicle_dict[v["id"]] = new_vehicle
         vehicles.append(new_vehicle)
+    return vehicle_dict
+
+def load_traffic_lights(loaded_lights: object, intersections_dict: dict[tuple, tuple], traffic_lights: list[TrafficLight], node_dict: dict[str, Node]) -> dict[str, TrafficLight]:
+    """Return id -> dictionary of traffic lights."""
+    # light_dict:
+    # light["id"]) : light["node_position"]
+    light_dict = {}
+    for light in loaded_lights:
+        if light_dict.get(light["id"]) == light["node_position"]:
+            raise ValueError(f"Duplicate traffic_light found: id: {light['id']}, node_position: {light['node_position']}.")
+        if not any(light["id"] in key for key in intersections_dict.keys()):
+            raise KeyError(f"Id '{light['id']}' not found in intersections.")
+        new_light = TrafficLight(light["id"], node_dict[light["node_position"]])
+        light_dict[light["id"]] = new_light
+        traffic_lights.append(new_light)
+    return light_dict
+
+def load_traffic_master(loaded_intersections: object, intersections: list[tuple]) -> dict[tuple[str], tuple[int]]:
+    """Return id -> Dictionary of intersections"""
+    #interection_dict: 
+    # (upcycle, downcycle): (green, yellow, red)
+    # intersection list:
+    # (upcycle, downcycle, green, yellow, red)
+    intersection_dict = {}
+    for intersection in loaded_intersections:
+        key = intersection["upcycle"], intersection["downcycle"]
+        if any(k in existing_key for existing_key in intersection_dict for k in key):
+            raise ValueError(f"Duplicate intersection upcycle/downcycle found: {key[0]}/{key[1]}")
+        color_details = (intersection["cycle"]["green"], intersection["cycle"]["yellow"], intersection["cycle"]["red"])
+        intersection_dict[key] = color_details
+        intersections.append(key + color_details)
+        
+    return intersection_dict
 
 
