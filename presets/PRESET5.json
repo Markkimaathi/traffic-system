@@ -1,9 +1,9 @@
 {
   "stored_vehicles": [
-    {"id": "vehicle_0", "route": "route_0", "route_position": 0, "velocity": 8},
-    {"id": "vehicle_1", "route": "route_1", "route_position": 0, "velocity": 8}, 
-    {"id": "vehicle_2", "route": "route_2", "route_position": 0, "velocity": 8},
-    {"id": "vehicle_3", "route": "route_3", "route_position": 0, "velocity": 8} 
+    {"id": "vehicle_0", "name": "Toyota", "route": "route_0", "route_position": 0, "velocity": 8},
+    {"id": "vehicle_1", "name": "Honda", "route": "route_1", "route_position": 0, "velocity": 8}, 
+    {"id": "vehicle_2", "name": "Ford", "route": "route_2", "route_position": 0, "velocity": 8},
+    {"id": "vehicle_3", "name": "Chevrolet", "route": "route_3", "route_position": 0, "velocity": 8} 
   ],
 
   "nodes": [
@@ -66,6 +66,19 @@
     {"id": "route_2", "source": "edge_5", "intermediate": ["edge_16"], "target": "edge_2", "comment": "left from north"},
     {"id": "route_3", "source": "edge_7", "intermediate": ["edge_19"], "target": "edge_4", "comment": "left from west"}
   ], 
+
+  "traffic_master_intersections": [
+    {
+      "cycle": {"green": 25, "yellow": 5, "red": 30},
+      "upcycle": "eglington",
+      "downcycle": "towncentre"
+    }
+  ],
+
+  "traffic_lights": [
+    {"id": "eglington", "node_position": "node_9"},
+    {"id": "towncentre", "node_position": "node_10"}
+  ],
   
   "manager": {
     "position": [0, 0],
