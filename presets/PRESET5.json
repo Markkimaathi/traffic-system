@@ -66,19 +66,6 @@
     {"id": "route_2", "source": "edge_5", "intermediate": ["edge_16"], "target": "edge_2", "comment": "left from north"},
     {"id": "route_3", "source": "edge_7", "intermediate": ["edge_19"], "target": "edge_4", "comment": "left from west"}
   ], 
-
-  "traffic_master_intersections": [
-    {
-      "cycle": {"green": 25, "yellow": 5, "red": 30},
-      "upcycle": "eglington",
-      "downcycle": "towncentre"
-    }
-  ],
-
-  "traffic_lights": [
-    {"id": "eglington", "node_position": "node_9"},
-    {"id": "towncentre", "node_position": "node_10"}
-  ],
   
   "manager": {
     "position": [0, 0],
