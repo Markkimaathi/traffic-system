@@ -5,7 +5,7 @@ from classes.vehicle import Vehicle
 from classes.node import Node
 from classes.edge import Edge, StraightEdge, CircularEdge
 from classes.route import route_position_to_world_position, direction_at_route_position
-from manager.manager import Manager, CAR_COLLISION_DISTANCE, detect_collisions
+from manager.manager import Manager, CAR_COLLISION_DISTANCE
 from classes.button import Button
 from .helper import world_to_screen_vector, world_to_screen_scalar, create_rotation_matrix, rotate_vector
 from .simulator import WORLD_WIDTH, WORLD_HEIGHT, TOOLBAR_HEIGHT
@@ -66,38 +66,20 @@ def render_vehicles(screen: Surface, vehicles: list[Vehicle]) -> None:
         vehicle_screen_length = world_to_screen_scalar(screen, vehicle.length, zoom_factor)
         
         vehicle_center_point = route_position_to_world_position(vehicle.route, vehicle.route_position)
+        if vehicle_center_point is None: # this vehicle is out of its route and returns no position
+            continue
         vehicle_center_screen_pos = world_to_screen_vector(screen, vehicle_center_point, zoom_factor)
         img = pygame.transform.smoothscale(vehicle.image, (vehicle_screen_length, vehicle_screen_width))
         vehicle_angle = direction_at_route_position(vehicle.route, vehicle.route_position)
         img = pygame.transform.rotate(img, vehicle_angle)
-
-        if vehicle.collided == True:
-            # gets size of image, creates a surface, and fills with with translucent red
-            img_size = img.get_size()
-            hue_surface = pygame.Surface(img_size)
-            hue_surface.fill((255,0,0))
-            hue_surface.set_alpha(100)
-            
-            # blits hue_surface (red surface) onto img_with_hue (copy of img)
-            img_with_hue = img.copy()
-            img_with_hue.blit(hue_surface, (0,0), special_flags=pygame.BLEND_RGBA_MULT)
-            # get the center of the car
-            car_rect = img_with_hue.get_rect()
-            car_rect.center = vehicle_center_screen_pos
-            # blit red overlay car onto screen
-            screen.blit(img_with_hue, car_rect)         
-        
-        else: # else display car w/o red overlay
-            car_rect = img.get_rect()
-            car_rect.center = vehicle_center_screen_pos
-            screen.blit(img, car_rect)
-
+        car_rect = img.get_rect()
+        car_rect.center = vehicle_center_screen_pos
+        screen.blit(img, car_rect)
         car_collision_screen_distance = world_to_screen_scalar(screen, CAR_COLLISION_DISTANCE/2, zoom_factor)
         pygame.draw.circle(screen, "red", vehicle_center_screen_pos, car_collision_screen_distance, 1)
         vehicle_text_font = pygame.font.SysFont('Consolas', 12)
         text_surface = vehicle_text_font.render(vehicle.name, True, (139, 69, 19))
         screen.blit(text_surface, (car_rect.center[0]-(vehicle_text_font.size(vehicle.name)[0])/2, car_rect.center[1]-vehicle_screen_length))
-
 
 def render_background(screen: Surface) -> None:
     """Render function for background."""
@@ -138,7 +120,7 @@ def render_manager(screen: Surface, manager: Manager) -> None:
     
     for i, vehicle in enumerate(manager.vehicles):
         font = pygame.font.SysFont('Segoe UI', 15)
-        text_surface = font.render(f"name: {vehicle.name}, pos: {vehicle.route_position:.2f}, accel: {vehicle.acceleration:.2f}, stamps: {vehicle.command.accel_func.x}", True, (0, 0, 0))
+        text_surface = font.render(f"name: {vehicle.name}, vel: {vehicle.velocity:.2f}m/s, accel: {vehicle.acceleration:.2f}m/s^2", True, (0, 0, 0))
         screen.blit(text_surface, (5,i*20 + 5))
 
 def render_time(screen: Surface, time_elapsed) -> None: 
@@ -234,6 +216,3 @@ def render_title(screen) -> None:
     FONT = pygame.font.SysFont("Segoe UI", 15, bold=True, italic=False)
     text_surface = FONT.render(f"Concurent Traffic v0.0.2", True, (255, 255, 255))
     screen.blit(text_surface, (6,screen.get_height()-TOOLBAR_HEIGHT+6))
-
-
-
